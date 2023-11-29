@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-i=n^1+h_x*x+(oo@6=9*#p*utw9=-+21pr*2*f3^7+!ppkpg4v'
+SECRET_KEY = config("secret_key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,7 +39,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
+    # corsheaders
+    'corsheaders', 
+    # rest-framework
+    'rest_framework', 
+    # dj-rest-auth
+    'rest_framework.authtoken', 
+	'dj_rest_auth.registration',
+    'dj_rest_auth',
+	# allauth
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+	# allauth social accounts
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    # local apps
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -107,11 +125,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE     = 'UTC'
 
-USE_I18N = True
+USE_I18N      = True
 
-USE_TZ = True
+USE_TZ        = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -126,11 +144,60 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-#  Corsheaders
+# Corsheaders
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-CORS_ALLOWED_ORIGINS = [
+CORS_ALLOWED_ORIGINS  = [
     "http://localhost:8080",
-    "http://127.0.0.1:9000",
+    "http://127.0.0.1:8000",
 ]
+
+
+# allauth
+SITE_ID                           = 1
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED         = False
+ACCOUNT_EMAIL_REQUIRED            = True
+ACCOUNT_AUTHENTICATION_METHOD     = 'email'
+ACCOUNT_EMAIL_VERIFICATION        = 'mandatory'
+
+
+# rest-framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    )
+}
+
+
+# simple jwt
+from datetime import timedelta
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME" : timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=2),
+}
+
+
+# rest auth
+REST_AUTH = {
+    'USE_JWT'                   : True,
+    'JWT_AUTH_COOKIE'           : 'access',
+    'JWT_AUTH_REFRESH_COOKIE'   : 'refresh',
+    'JWT_AUTH_HTTPONLY'         : True,
+    'SESSION_LOGIN'             : False,
+    'OLD_PASSWORD_FIELD_ENABLED': True,
+}
+
+
+# send email
+EMAIL_BACKEND       = config("EMAIL_BACKEND")
+EMAIL_HOST          = config("EMAIL_HOST")
+EMAIL_USE_TLS       = config("EMAIL_USE_TLS", "")
+EMAIL_PORT          = config("EMAIL_PORT")
+EMAIL_HOST_USER     = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+
+
+# Custom Usermodel
+AUTH_USER_MODEL = "accounts.CustomUserModel"
